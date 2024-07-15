@@ -1,3 +1,4 @@
+/*
 import logo from './logo.svg';
 import './App.css';
 
@@ -20,6 +21,27 @@ function App() {
       </header>
     </div>
   );
+}
+
+export default App;
+*/
+
+// import {Routes, Route, Navigate} from 'react-router-dom';
+import {Routes, Route} from 'react-router-dom';
+
+import LoginHandler from './LoginHandler';
+import Home from './Home';
+import Root from './Root';
+
+function App() {
+	return (
+			<Routes>
+				<Route path = "/" element = {<Root/>}/>
+				<Route path = "/auth/kakao/callback" element = {<LoginHandler/>}/>
+				<Route path = "/home" element = {<Home/>}/>
+				{/*<Route path = "*" element = {<Navigate to = "/" replace = {true}/>}/>*/}
+			</Routes>
+	);
 }
 
 export default App;
