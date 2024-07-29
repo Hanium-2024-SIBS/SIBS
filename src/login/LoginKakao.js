@@ -24,7 +24,7 @@ const SocialKakao =()=>{
 
 export default SocialKakao*/
 
-import kakaoImage from './assets/Kakao.png';
+import kakaoImage from '../assets/Kakao.png';
 
 const CLIENT_ID = process.env.REACT_APP_REST_API_KEY;
 const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;

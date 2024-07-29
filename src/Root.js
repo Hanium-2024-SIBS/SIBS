@@ -1,5 +1,5 @@
-import GoogleApp from "./LoginGoogle";
-import KakaoApp from "./LoginKakao";
+import GoogleApp from "./login/LoginGoogle";
+import KakaoApp from "./login/LoginKakao";
 
 const Root = () => {
 	return (
