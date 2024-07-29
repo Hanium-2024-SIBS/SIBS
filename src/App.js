@@ -1,3 +1,4 @@
+/*
 import logo from './logo.svg';
 import './App.css';
 
@@ -20,6 +21,30 @@ function App() {
       </header>
     </div>
   );
+}
+
+export default App;
+*/
+
+// import {Routes, Route, Navigate} from 'react-router-dom';
+import {Routes, Route} from 'react-router-dom';
+
+import KakaoLoginHandler from './login/KakaoLoginHandler';
+import NaverLogin from './login/LoginNaver';
+
+import Home from './Home';
+import Root from './Root';
+
+function App() {
+	return (
+			<Routes>
+				<Route path = "/" element = {<Root/>}/>
+				<Route path = "/auth/kakao/callback" element = {<KakaoLoginHandler/>}/>
+				<Route path = "/home" element = {<Home/>}/>
+				<Route path = "/naver" element = {<NaverLogin/>}/>
+				{/*<Route path = "*" element = {<Navigate to = "/" replace = {true}/>}/>*/}
+			</Routes>
+	);
 }
 
 export default App;
