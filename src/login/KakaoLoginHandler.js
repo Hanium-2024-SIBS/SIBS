@@ -77,7 +77,7 @@ const KakaoCallback = (props) => {
 			.catch((Error) => {
 				console.log(Error)
 			})
-	}, [])
+	},)
 
 	return (
 		<>
