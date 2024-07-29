@@ -49,9 +49,10 @@ const KakaoCallback = (props) => {
 		const grantType = "authorization_code";
 		const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
 		const REDIRECT_URI = process.env.REACT_APP_REDIRECT_URI;
+		const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
 		axios.post(
-			`https://kauth.kakao.com/oauth/token?grant_type=${grantType}&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&code=${code}`,
+			`https://kauth.kakao.com/oauth/token?grant_type=${grantType}&client_id=${REST_API_KEY}&client_secret=${CLIENT_SECRET}&redirect_uri=${REDIRECT_URI}&code=${code}`,
 			{},
 			{headers: {"Content-type": "application/x-www-form-urlencoded;charset=utf-8"}}
 		)
