@@ -19,6 +19,10 @@ import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
+import {useMutation, useQuery} from '@apollo/client';
+
+import { INSERT_USER_INFO } from '../Query/useryQuery';
+
 function LoginSignUp() {
   const [action, setAction] = useState("Login");
   const [leftContentIndex, setLeftContentIndex] = useState(0);
@@ -26,6 +30,8 @@ function LoginSignUp() {
   const [userData, setUserData] = useState({ name: "", email: "", password: "", birthday: "" });
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
+
+  const [insertUserData] = useMutation(INSERT_USER_INFO);
 
   const navigate = useNavigate();
 
@@ -67,7 +73,7 @@ function LoginSignUp() {
             },
           });
           const userInfo = response.data;
-          setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" });
+          setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" , clientId: userInfo.id, birthday: ""});
           setGoogleEmail(userInfo.email);
           setIsGoogleLoggedIn(true);
 
@@ -118,8 +124,22 @@ function LoginSignUp() {
 
   const handleSubmit = () => {
     if (action === "Sign Up") {
-      localStorage.setItem('userData', JSON.stringify(userData));
+      // localStorage.setItem('userData', JSON.stringify(userData));
       alert(`Sign Up Data:\nName: ${userData.name}\nEmail: ${userData.email}\nPassword: ${userData.password}\nBirthday: ${userData.birthday}`);
+
+      const userInfo = {
+        email: userData.email,
+        provider: "Google",
+        password: userData.password,
+        birthday: userData.birthday,
+        clientId: userData.clientId
+      }
+
+      // 가입 query실행
+      insertUserData({variables: {
+        user: userInfo
+      }});
+
       setIsGoogleLoggedIn(false); // Reset Google login state
       setAction("Login"); // Switch back to login
       setUserData(prevState => ({ ...prevState, password: "" })); // Reset password
