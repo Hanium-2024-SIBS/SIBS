@@ -20,6 +20,7 @@ import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
 import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
+import { kakaoOAuthHandler, fetchKakaoUserData } from './LoginKakao';
 
 function LoginSignUp() {
   const [action, setAction] = useState("Login");
@@ -28,19 +29,15 @@ function LoginSignUp() {
   const [userData, setUserData] = useState({ name: "", email: "", password: "", birthday: "" });
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
-
-  const navigate = useNavigate();
-
-  const kakaoOAuthURL = `https://kauth.kakao.com/oauth/authorize?client_id=YOUR_KAKAO_CLIENT_ID&redirect_uri=http://localhost:3000/kakao&response_type=code`;
-  const naverOAuthURL = `https://nid.naver.com/oauth2.0/authorize?client_id=YOUR_NAVER_CLIENT_ID&response_type=code&redirect_uri=http://localhost:3000/naver&state=STATE_STRING`;
-
-  const kakaoOAuthHandler = () => {
-    window.location.assign(kakaoOAuthURL);
-  };
-
+  const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(false);
+  const [kakaoEmail, setKakaoEmail] = useState("");
+  
+  const naverOAuthURL = `https://nid.naver.com/oauth2.0/authorize?client_id=YOUR_NAVER_CLIENT_ID&response_type=code&redirect_uri=http://localhost:3000&state=STATE_STRING`;
   const naverOAuthHandler = () => {
     window.location.assign(naverOAuthURL);
   };
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -64,6 +61,22 @@ function LoginSignUp() {
 
         const savedUserData = JSON.parse(localStorage.getItem('userData'));
         if (savedUserData && savedUserData.email === userInfo.email) {
+          navigate('/');
+        } else {
+          setAction("Sign Up"); 
+        }
+      }
+    };
+
+    const fetchKakaoData = async () => {
+      const userInfo = await fetchKakaoUserData();
+      if (userInfo) {
+        setUserData({ name: userInfo.properties.nickname, email: userInfo.kakao_account.email, password: "", birthday: "" });
+        setKakaoEmail(userInfo.kakao_account.email);
+        setIsKakaoLoggedIn(true);
+
+        const savedUserData = JSON.parse(localStorage.getItem('userData'));
+        if (savedUserData && savedUserData.email === userInfo.kakao_account.email) {
           navigate('/'); // 동일한 이메일이 있다면 Home.jsx로 이동
         } else {
           setAction("Sign Up"); // 동일한 이메일이 없다면 추가 정보 입력
@@ -72,15 +85,19 @@ function LoginSignUp() {
     };
 
     fetchData();
+    fetchKakaoData();
   }, [navigate]);
 
   useEffect(() => {
     if (action === "Login") {
       setUserData(prevState => ({ ...prevState, email: "", password: "" })); // 초기화
-    } else if (action === "Sign Up" && isGoogleLoggedIn) {
-      setUserData(prevState => ({ ...prevState, email: googleEmail }));
+    } else if (action === "Sign Up" && (isGoogleLoggedIn || isKakaoLoggedIn)) {
+      setUserData(prevState => ({
+        ...prevState,
+        email: isGoogleLoggedIn ? googleEmail : kakaoEmail
+      }));
     }
-  }, [action, isGoogleLoggedIn, googleEmail]);
+  }, [action, isGoogleLoggedIn, googleEmail, isKakaoLoggedIn, kakaoEmail]);
 
   const leftContents = [
     {
@@ -107,6 +124,7 @@ function LoginSignUp() {
       localStorage.setItem('userData', JSON.stringify(userData));
       alert(`Sign Up Data:\nName: ${userData.name}\nEmail: ${userData.email}\nPassword: ${userData.password}\nBirthday: ${userData.birthday}`);
       setIsGoogleLoggedIn(false); // Reset Google login state
+      setIsKakaoLoggedIn(false); // Reset Kakao login state
       setAction("Login"); // Switch back to login
       setUserData(prevState => ({ ...prevState, password: "" })); // Reset password
     } else {
@@ -148,7 +166,7 @@ function LoginSignUp() {
         <div className="inputs">
           {action === "Sign Up" && (
             <>
-              {isGoogleLoggedIn ? (
+              {isGoogleLoggedIn || isKakaoLoggedIn ? (
                 <>
                   <div className="input">
                     <img src={user_icon} alt="User Icon" className="" />
@@ -188,11 +206,11 @@ function LoginSignUp() {
                       onChange={handleInputChange}
                     />
                   </div>
-                  <div className="create-account" onClick={handleSubmit}>계정 만들기</div>
+                  <div className="input create-account" onClick={handleSubmit}>계정 만들기</div>
                 </>
               ) : (
                 <>
-                  <div className="social-login signup">
+                  <div className="social-login vertical">
                     <div className="social-button signup-button" onClick={kakaoOAuthHandler} style={{ backgroundImage: `url(${signup_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
                     <div className="social-button signup-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
@@ -232,7 +250,7 @@ function LoginSignUp() {
         </div>
         
         {action === "Login" && (
-          <div className="social-login login">
+          <div className="social-login horizontal">
             <div className="social-button rect-button" onClick={kakaoOAuthHandler} style={{ backgroundImage: `url(${login_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
             <div className="social-button login-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${login_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
