@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createRoutesFromElements, useNavigate } from 'react-router-dom';
 import './LoginSignup.css';
 import axios from 'axios';
 
@@ -19,9 +19,9 @@ import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
-import {useMutation, useQuery} from '@apollo/client';
+import {useMutation, useQuery, useLazyQuery} from '@apollo/client';
 
-import { INSERT_USER_INFO } from '../Query/useryQuery';
+import { INSERT_USER_INFO, GET_ONE_USER } from '../Query/useryQuery';
 
 function LoginSignUp() {
   const [action, setAction] = useState("Login");
@@ -31,7 +31,10 @@ function LoginSignUp() {
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
 
+  // GraphQL Query Method
   const [insertUserData] = useMutation(INSERT_USER_INFO);
+  // const [getUserData] = useQuery(GET_ONE_USER);
+  const [getUserData] = useLazyQuery(GET_ONE_USER);
 
   const navigate = useNavigate();
 
@@ -73,11 +76,25 @@ function LoginSignUp() {
             },
           });
           const userInfo = response.data;
-          setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" , clientId: userInfo.id, birthday: ""});
+          setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" , clientId: userInfo.id});
           setGoogleEmail(userInfo.email);
           setIsGoogleLoggedIn(true);
 
+          // 사용자가 로그인 내역 저장하기를 했을 때 실행
           const savedUserData = JSON.parse(localStorage.getItem('userData'));
+
+          // DB로부터 사용자 정보가 있는지 확인하는 쿼리를 날려서 동일한지 확인.
+          const user = {
+            "user": {
+              "email": {
+                "_eq": userInfo.email
+              }
+            }
+          };
+
+          const result = await getUserData({variables: user});
+          console.log("user: ", result.data);
+
           if (savedUserData && savedUserData.email === userInfo.email) {
             navigate('/'); // 동일한 이메일이 있다면 Home.jsx로 이동
           } else {

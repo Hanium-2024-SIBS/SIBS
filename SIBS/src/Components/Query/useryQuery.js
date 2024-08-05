@@ -12,4 +12,17 @@ mutation insertUser($user: User_insert_input!){
 }
 `
 
-export {INSERT_USER_INFO};
+const GET_ONE_USER = gql`
+query getUserOne($user: User_bool_exp){
+  User(where: $user){
+    user_id,
+    clientId,
+    email,
+    password,
+    provider,
+    birthday
+  }
+}
+`;
+
+export {INSERT_USER_INFO, GET_ONE_USER};
