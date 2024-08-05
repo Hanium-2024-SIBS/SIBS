@@ -19,6 +19,8 @@ import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
+import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
+
 function LoginSignUp() {
   const [action, setAction] = useState("Login");
   const [leftContentIndex, setLeftContentIndex] = useState(0);
@@ -29,12 +31,11 @@ function LoginSignUp() {
 
   const navigate = useNavigate();
 
-  const googleOAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=291815217838-rs2shve1q824p135226rob4nm0pt5o95.apps.googleusercontent.com&response_type=token&redirect_uri=http://localhost:3000/login&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
+  const kakaoOAuthURL = `https://kauth.kakao.com/oauth/authorize?client_id=YOUR_KAKAO_CLIENT_ID&redirect_uri=http://localhost:3000/kakao&response_type=code`;
+  const naverOAuthURL = `https://nid.naver.com/oauth2.0/authorize?client_id=YOUR_NAVER_CLIENT_ID&response_type=code&redirect_uri=http://localhost:3000/naver&state=STATE_STRING`;
 
-  const naverOAuthURL = `https://nid.naver.com/oauth2.0/authorize?client_id=YOUR_NAVER_CLIENT_ID&response_type=code&redirect_uri=http://localhost:3000/login&state=STATE_STRING`;
-
-  const googleOAuthHandler = () => {
-    window.location.assign(googleOAuthURL);
+  const kakaoOAuthHandler = () => {
+    window.location.assign(kakaoOAuthURL);
   };
 
   const naverOAuthHandler = () => {
@@ -55,32 +56,17 @@ function LoginSignUp() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const url = new URL(window.location.href);
-      const hash = url.hash;
-      if (hash) {
-        const accessToken = new URLSearchParams(hash.substring(1)).get('access_token');
-        try {
-          const response = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' + accessToken, {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-              accept: 'application/json',
-            },
-          });
-          const userInfo = response.data;
-          setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" });
-          setGoogleEmail(userInfo.email);
-          setIsGoogleLoggedIn(true);
+      const userInfo = await fetchGoogleUserData();
+      if (userInfo) {
+        setUserData({ name: userInfo.name, email: userInfo.email, password: "", birthday: "" });
+        setGoogleEmail(userInfo.email);
+        setIsGoogleLoggedIn(true);
 
-          const savedUserData = JSON.parse(localStorage.getItem('userData'));
-          if (savedUserData && savedUserData.email === userInfo.email) {
-            navigate('/'); // 동일한 이메일이 있다면 Home.jsx로 이동
-          } else {
-            setAction("Sign Up"); // 동일한 이메일이 없다면 추가 정보 입력
-          }
-
-          window.history.replaceState({}, document.title, "/login"); // Update URL
-        } catch (error) {
-          console.log('oAuth token expired', error);
+        const savedUserData = JSON.parse(localStorage.getItem('userData'));
+        if (savedUserData && savedUserData.email === userInfo.email) {
+          navigate('/'); // 동일한 이메일이 있다면 Home.jsx로 이동
+        } else {
+          setAction("Sign Up"); // 동일한 이메일이 없다면 추가 정보 입력
         }
       }
     };
@@ -202,12 +188,12 @@ function LoginSignUp() {
                       onChange={handleInputChange}
                     />
                   </div>
-                  <div className="social-button create-account" onClick={handleSubmit}>계정 만들기</div>
+                  <div className="create-account" onClick={handleSubmit}>계정 만들기</div>
                 </>
               ) : (
                 <>
                   <div className="social-login signup">
-                    <div className="social-button signup-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+                    <div className="social-button signup-button" onClick={kakaoOAuthHandler} style={{ backgroundImage: `url(${signup_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
                     <div className="social-button signup-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
@@ -247,7 +233,7 @@ function LoginSignUp() {
         
         {action === "Login" && (
           <div className="social-login login">
-            <div className="social-button rect-button" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${login_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+            <div className="social-button rect-button" onClick={kakaoOAuthHandler} style={{ backgroundImage: `url(${login_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
             <div className="social-button login-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${login_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
