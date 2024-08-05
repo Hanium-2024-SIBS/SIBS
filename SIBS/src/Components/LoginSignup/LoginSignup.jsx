@@ -12,7 +12,7 @@ import chatting_img from '../Assets/chatting.png';
 import minigame1_img from '../Assets/vote.png';
 import minigame2_img from '../Assets/roulette.png';
 
-import signup_google from '../Assets/signup_google.svg';
+import signup_google from '../Assets/signup_google.png';
 import login_google from '../Assets/login_google.png';
 import signup_naver from '../Assets/signup_naver.png';
 import login_naver from '../Assets/login_naver.png';
@@ -206,12 +206,12 @@ function LoginSignUp() {
                 </>
               ) : (
                 <>
-                  <div className="social-login">
-                    <div className="social-button kakao" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${signup_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+                  <div className="social-login signup">
+                    <div className="social-button signup-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
-                    <div className="social-button google" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+                    <div className="social-button signup-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${signup_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
-                    <div className="social-button naver" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${signup_naver})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+                    <div className="social-button signup-button" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${signup_naver})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                     </div>
                   </div>
                 </>
@@ -240,18 +240,18 @@ function LoginSignUp() {
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="social-button login-button" onClick={handleSubmit}>로그인</div>
+              <div className="input login-button" onClick={handleSubmit}>로그인</div>
             </>
           )}
         </div>
         
         {action === "Login" && (
-          <div className="social-login">
-            <div className="social-button kakao" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${login_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+          <div className="social-login login">
+            <div className="social-button rect-button" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${login_kakao})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
-            <div className="social-button google" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${login_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+            <div className="social-button login-button" onClick={googleOAuthHandler} style={{ backgroundImage: `url(${login_google})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
-            <div className="social-button naver" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${login_naver})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+            <div className="social-button login-button" onClick={naverOAuthHandler} style={{ backgroundImage: `url(${login_naver})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             </div>
           </div>
         )}
