@@ -19,6 +19,9 @@ import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
+import {useMutation, useLazyQuery} from '@apollo/client';
+import {INSERT_USER_INFO, GET_ONE_USER} from '../../Query/query';
+
 import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
 
 const kakaoOAuthHandler = () => {
@@ -50,9 +53,14 @@ function LoginSignUp() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState(kakaoName || "");
   const [birthday, setBirthday] = useState("");
+  const [provider, setProvider] = useState("");
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(!!kakaoEmail);
+  // query function
+  const [insertUserData] = useMutation(INSERT_USER_INFO);
+  const [getUserData] = useLazyQuery(GET_ONE_USER);
 
+  // Init effect
   useEffect(() => {
     const intervalId = setInterval(() => {
       setFadeClass("fade");
@@ -73,11 +81,24 @@ function LoginSignUp() {
         setName(googleUserInfo.name);
         setEmail(googleUserInfo.email);
         setIsGoogleLoggedIn(true);
+        // 회원가입 한 적이 없다면 전환하여야 함
+        // 회원가입을 한 적이 있다면 home으로
         setAction("Sign Up"); // SignUp 탭으로 전환
+        const user = {
+          "user": {
+            "email": {
+              "_eq": googleUserInfo.email
+            }
+          }
+        }
+        const result = getUserData({variables: user});
+        console.log(`result: ${email}${name}`);
   
+        // LocalStorage에 저장된 사용자 email이 로그인했을 때 email이 같은 경우
+        // DB에서 작업할 필요가 있다.
         const savedUserData = JSON.parse(localStorage.getItem('userData'));
-        if (savedUserData && savedUserData.email === googleUserInfo.email) {
-          navigate('/home', { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
+        if ((savedUserData && savedUserData.email === googleUserInfo.email) || result.data) {
+          navigate('/', { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
         }
       }
     };
@@ -93,9 +114,11 @@ function LoginSignUp() {
       if (isGoogleLoggedIn) {
         setEmail(email);
         setName(name);
+        setProvider("Google");
       } else if (isKakaoLoggedIn) {
         setEmail(kakaoEmail);
         setName(kakaoName);
+        setProvider("Kakao");
       }
     }
   }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName, email, name]);
@@ -123,15 +146,30 @@ function LoginSignUp() {
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // 회원가입 Submit
     if (action === "Sign Up") {
       const userData = { name, email, password, birthday };
-      localStorage.setItem('userData', JSON.stringify(userData));
+      // localStorage.setItem('userData', JSON.stringify(userData));
       alert(`Sign Up Data:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\nBirthday: ${birthday}`);
+      
+      console.log(userData);
+      const userInfo = {
+        email: userData.email,
+        provider: "Google",
+        password: userData.password,
+        birthday: userData.birthday,
+        clientId: userData.clientId
+      }
+
+      insertUserData({variables: {
+        user: userInfo
+      }});
+      
       setIsGoogleLoggedIn(false);
       setIsKakaoLoggedIn(false);
       setAction("Login");
       setPassword("");
-    } else {
+    } else { // 그냥 Login Submit
       const savedUserData = JSON.parse(localStorage.getItem('userData'));
       if (savedUserData && savedUserData.email === email && savedUserData.password === password) {
         alert(`Login Data:\nEmail: ${email}\nPassword: ${password}`);
