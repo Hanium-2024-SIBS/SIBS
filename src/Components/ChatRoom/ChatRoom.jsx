@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
-const socket = io(); // 소켓 서버와 연결
 const SERVER_URL = 'http://localhost:5000'; // 파이썬 서버 URL
 
 const userImages = [
@@ -22,47 +20,6 @@ function ChatRoom() {
   const [userName] = useState(userNames[Math.floor(Math.random() * userNames.length)]);
   const [dislikedUsers, setDislikedUsers] = useState(new Set());
   const [likedUsers, setLikedUsers] = useState(new Set());
-
-  useEffect(() => {
-    socket.emit('requestInitialMessages');
-    console.log('requestInitialMessages sent');
-
-    socket.on('initialMessages', (initialMessages) => {
-      console.log('initialMessages received', initialMessages);
-      setMessages(initialMessages);
-      setDislikedUsers(new Set());
-      setLikedUsers(new Set());
-    });
-
-    socket.on('message', (message) => {
-      console.log("New message received:", message); // 디버깅 로그 추가
-      setMessages((messages) => [message, ...messages]);
-      if (message.dislikes >= 30) {
-        setDislikedUsers(prev => new Set(prev).add(message.uid));
-      }
-      if (message.likes >= 30) {
-        setLikedUsers(prev => new Set(prev).add(message.uid));
-      }
-    });
-
-    socket.on('updateMessages', (updatedMessages) => {
-      setMessages(updatedMessages);
-      updatedMessages.forEach(message => {
-        if (message.dislikes >= 30) {
-          setDislikedUsers(prev => new Set(prev).add(message.uid));
-        }
-        if (message.likes >= 30) {
-          setLikedUsers(prev => new Set(prev).add(message.uid));
-        }
-      });
-    });
-
-    return () => {
-      socket.off('initialMessages');
-      socket.off('message');
-      socket.off('updateMessages');
-    };
-  }, []);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -116,7 +73,6 @@ function ChatRoom() {
       }
 
       console.log("Emitting message:", newMessage); // 추가된 디버깅 로그
-      socket.emit('message', newMessage); // 메시지를 소켓을 통해 서버로 전송
 
       // 메시지를 UI에 바로 반영
       setMessages((messages) => [newMessage, ...messages]);
@@ -126,13 +82,6 @@ function ChatRoom() {
     }
   };
 
-  const handleLike = (id) => {
-    socket.emit('likeMessage', id);
-  };
-
-  const handleDislike = (id) => {
-    socket.emit('dislikeMessage', id);
-  };
 
   return (
     <div className="App">
@@ -147,8 +96,6 @@ function ChatRoom() {
           <ChatMessage 
             key={index} 
             message={msg} 
-            onLike={() => handleLike(msg.id)} 
-            onDislike={() => handleDislike(msg.id)} 
             dislikedUsers={dislikedUsers}
             likedUsers={likedUsers}
           />

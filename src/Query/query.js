@@ -7,7 +7,8 @@ mutation insertUser($user: User_insert_input!){
         provider,
         clientId,
         password,
-        birthday
+        birthday,
+        name
     }
 }
 `
@@ -20,7 +21,8 @@ query getUserOne($user: User_bool_exp){
     email,
     password,
     provider,
-    birthday
+    birthday,
+    name
   }
 }
 `;

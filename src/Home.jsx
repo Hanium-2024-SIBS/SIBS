@@ -13,6 +13,7 @@ function Home() {
   });
 
   useEffect(() => {
+    console.log(email, name);
     if (email && name) {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('userEmail', email);

@@ -54,6 +54,7 @@ function LoginSignUp() {
   const [name, setName] = useState(kakaoName || "");
   const [birthday, setBirthday] = useState("");
   const [provider, setProvider] = useState("");
+  const [clientId, setClientId] = useState('');
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(!!kakaoEmail);
   // query function
@@ -78,12 +79,14 @@ function LoginSignUp() {
       const googleUserInfo = await fetchGoogleUserData();
       if (googleUserInfo) {
         console.log('Google User Info:', googleUserInfo); // 로그로 구글 사용자 정보 확인
-        setName(googleUserInfo.name);
-        setEmail(googleUserInfo.email);
         setIsGoogleLoggedIn(true);
         // 회원가입 한 적이 없다면 전환하여야 함
         // 회원가입을 한 적이 있다면 home으로
         setAction("Sign Up"); // SignUp 탭으로 전환
+        setName(googleUserInfo.name);
+        setEmail(googleUserInfo.email);
+        setClientId(googleUserInfo.id);
+
         const user = {
           "user": {
             "email": {
@@ -91,13 +94,14 @@ function LoginSignUp() {
             }
           }
         }
-        const result = getUserData({variables: user});
-        console.log(`result: ${email}${name}`);
+        const result = await getUserData({variables: user});
+        console.log(result);
   
         // LocalStorage에 저장된 사용자 email이 로그인했을 때 email이 같은 경우
         // DB에서 작업할 필요가 있다.
         const savedUserData = JSON.parse(localStorage.getItem('userData'));
-        if ((savedUserData && savedUserData.email === googleUserInfo.email) || result.data) {
+        // console.log('result: ', result.data);
+        if ((savedUserData && savedUserData.email === googleUserInfo.email) || result.data.User.length > 0) {
           navigate('/', { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
         }
       }
@@ -112,8 +116,8 @@ function LoginSignUp() {
       setPassword("");
     } else if (action === "Sign Up") {
       if (isGoogleLoggedIn) {
-        setEmail(email);
-        setName(name);
+        // setEmail(email);
+        // setName(name);
         setProvider("Google");
       } else if (isKakaoLoggedIn) {
         setEmail(kakaoEmail);
@@ -121,7 +125,7 @@ function LoginSignUp() {
         setProvider("Kakao");
       }
     }
-  }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName, email, name]);
+  }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName, name]);
 
   const leftContents = [
     {
@@ -143,12 +147,12 @@ function LoginSignUp() {
 
   const { text, subText, imgSrc } = leftContents[leftContentIndex];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // 회원가입 Submit
     if (action === "Sign Up") {
-      const userData = { name, email, password, birthday };
+      const userData = { name, email, password, birthday, clientId };
       // localStorage.setItem('userData', JSON.stringify(userData));
       alert(`Sign Up Data:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\nBirthday: ${birthday}`);
       
@@ -158,7 +162,8 @@ function LoginSignUp() {
         provider: "Google",
         password: userData.password,
         birthday: userData.birthday,
-        clientId: userData.clientId
+        clientId: userData.clientId,
+        name: userData.name
       }
 
       insertUserData({variables: {
@@ -171,12 +176,27 @@ function LoginSignUp() {
       setPassword("");
     } else { // 그냥 Login Submit
       const savedUserData = JSON.parse(localStorage.getItem('userData'));
-      if (savedUserData && savedUserData.email === email && savedUserData.password === password) {
+      const userData = {
+        "user": {
+            "_and": [
+              {"email": {"_eq": email}},
+              {"password": {"_eq": password}}
+            ]
+          }
+      }
+
+      // Email과 Password가 동일한 사용자의 데이터를 가져온다.
+      const dbUserData = await getUserData({variables: userData});
+      console.log(dbUserData.data.User);
+      console.log(dbUserData.data.User.length);
+      // 가져온 데이터가 있는 경우 로그인 한다.
+      if (dbUserData.data.User.length > 0 || (savedUserData && savedUserData.email === email && savedUserData.password === password)) {
         alert(`Login Data:\nEmail: ${email}\nPassword: ${password}`);
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', savedUserData.name);
-        navigate('/', { state: { email, name: savedUserData.name } });
+        // localStorage.setItem('isLoggedIn', 'true');
+        // localStorage.setItem('userEmail', email);
+        // localStorage.setItem('userName', savedUserData.name);
+        console.log({ state: { email: dbUserData.data.User[0].email, name: dbUserData.data.User[0].name }});
+        navigate('/', { state: { email: dbUserData.data.User[0].email, name: dbUserData.data.User[0].name } });
       } else {
         alert("Invalid email or password");
       }
@@ -263,10 +283,10 @@ function LoginSignUp() {
                 <div className="input">
                   <img src={email_icon} alt="Email Icon" />
                   <input
-                    type="email"
+                    type="text"
                     placeholder="Email ID"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {setEmail(e.target.value);}}
                   />
                 </div>
                 <div className="input">
@@ -275,7 +295,7 @@ function LoginSignUp() {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {setPassword(e.target.value);}}
                   />
                 </div>
                 <div className="input login-button">
