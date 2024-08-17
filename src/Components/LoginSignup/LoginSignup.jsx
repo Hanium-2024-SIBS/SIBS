@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './LoginSignup.css';
 
-// 이미지 및 기타 파일들
 import user_icon from '../Assets/person.png';
 import email_icon from '../Assets/email.png';
 import password_icon from '../Assets/password.png';
@@ -46,59 +45,47 @@ function LoginSignUp() {
   const [action, setAction] = useState("Login");
   const [leftContentIndex, setLeftContentIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState("show");
-  const [email, setEmail] = useState(kakaoEmail || "");
+  const [email, setEmail] = useState(kakaoEmail || ""); // Sign Up 탭의 이메일 상태
+  const [loginEmail, setLoginEmail] = useState(""); // Login 탭의 이메일 상태
   const [password, setPassword] = useState("");
   const [name, setName] = useState(kakaoName || "");
   const [birthday, setBirthday] = useState("");
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(!!kakaoEmail);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setFadeClass("fade");
-      setTimeout(() => {
-        setLeftContentIndex(prevIndex => (prevIndex + 1) % leftContents.length);
-        setFadeClass("show");
-      }, 2000);
-    }, 7000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
+  // Google 로그인 후 사용자 정보 설정 (Sign Up 탭의 이메일과 이름만 설정)
   useEffect(() => {
     const fetchData = async () => {
       const googleUserInfo = await fetchGoogleUserData();
       if (googleUserInfo) {
-        console.log('Google User Info:', googleUserInfo); // 로그로 구글 사용자 정보 확인
-        setName(googleUserInfo.name);
-        setEmail(googleUserInfo.email);
+        console.log('Google API response:', googleUserInfo);
+        setName((prevName) => prevName || googleUserInfo.name);
+        setEmail((prevEmail) => prevEmail || googleUserInfo.email);
         setIsGoogleLoggedIn(true);
-        setAction("Sign Up"); // SignUp 탭으로 전환
-  
-        const savedUserData = JSON.parse(localStorage.getItem('userData'));
-        if (savedUserData && savedUserData.email === googleUserInfo.email) {
-          navigate('/home', { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
-        }
+        setAction("Sign Up");
       }
     };
-  
     fetchData();
   }, [navigate]);
 
+  // 상태 초기화 및 동기화 (Login 탭의 이메일은 초기화하지 않음)
   useEffect(() => {
-    if (action === "Login") {
-      setEmail("");
-      setPassword("");
-    } else if (action === "Sign Up") {
-      if (isGoogleLoggedIn) {
-        setEmail(email);
-        setName(name);
-      } else if (isKakaoLoggedIn) {
-        setEmail(kakaoEmail);
-        setName(kakaoName);
+    if (action === "Sign Up") {
+      if (isKakaoLoggedIn) {
+        setEmail((prev) => prev || kakaoEmail);
+        setName((prev) => prev || kakaoName);
       }
+    } else if (action === "Login") {
+      // 로그인 시 비밀번호만 초기화
+      setPassword("");
     }
-  }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName, email, name]);
+  }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName]);
+
+  // 이메일과 이름이 제대로 설정되었는지 확인하는 로깅 (Sign Up 탭의 상태)
+  useEffect(() => {
+    console.log('Final Email state:', email);
+    console.log('Final Name state:', name);
+  }, [email, name]);
 
   const leftContents = [
     {
@@ -122,7 +109,7 @@ function LoginSignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (action === "Sign Up") {
       const userData = { name, email, password, birthday };
       localStorage.setItem('userData', JSON.stringify(userData));
@@ -133,12 +120,12 @@ function LoginSignUp() {
       setPassword("");
     } else {
       const savedUserData = JSON.parse(localStorage.getItem('userData'));
-      if (savedUserData && savedUserData.email === email && savedUserData.password === password) {
-        alert(`Login Data:\nEmail: ${email}\nPassword: ${password}`);
+      if (savedUserData && savedUserData.email === loginEmail && savedUserData.password === password) {
+        alert(`Login Data:\nEmail: ${loginEmail}\nPassword: ${password}`);
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userEmail', loginEmail);
         localStorage.setItem('userName', savedUserData.name);
-        navigate('/', { state: { email, name: savedUserData.name } });
+        navigate('/', { state: { email: loginEmail, name: savedUserData.name } });
       } else {
         alert("Invalid email or password");
       }
@@ -173,7 +160,7 @@ function LoginSignUp() {
                       <input
                         type="text"
                         placeholder="Name"
-                        value={name}
+                        value={name}  // 이름 상태 출력
                         readOnly
                       />
                     </div>
@@ -182,10 +169,11 @@ function LoginSignUp() {
                       <input
                         type="email"
                         placeholder="Email ID"
-                        value={email}
-                        readOnly
+                        value={email}  // 이메일 상태 출력
+                        readOnly  // Sign Up에서는 이메일은 변경 불가이므로 readOnly 설정
                       />
                     </div>
+
                     <div className="input">
                       <img src={password_icon} alt="Password Icon" />
                       <input
@@ -227,8 +215,8 @@ function LoginSignUp() {
                   <input
                     type="email"
                     placeholder="Email ID"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={loginEmail}  // Login 탭의 이메일 상태 출력
+                    onChange={(e) => setLoginEmail(e.target.value)}
                   />
                 </div>
                 <div className="input">

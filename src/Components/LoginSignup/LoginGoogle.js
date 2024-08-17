@@ -17,11 +17,14 @@ export const fetchGoogleUserData = async () => {
           accept: 'application/json',
         },
       });
-      window.history.replaceState({}, document.title, "/login"); // Update URL
-      return response.data;
+      console.log('Google API response:', response.data);  // 전체 응답을 확인
+      const { name, email } = response.data;
+      window.history.replaceState({}, document.title, "/login"); // URL 정리
+      return { name, email };
     } catch (error) {
-      console.log('oAuth token expired', error);
+      console.error('OAuth token expired or failed to fetch user data:', error);
     }
   }
   return null;
 };
+

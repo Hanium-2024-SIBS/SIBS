@@ -124,12 +124,16 @@
 }
 
 .input.login-button {
-    justify-content: center; /* Center the text */
-    color: #fff; /* White text color */
-    background: #4c00b4; /* Background color */
-    cursor: pointer; /* Pointer cursor */
+    justify-content: center;
+    color: #fff;
+    background: #4c00b4;
+    cursor: pointer;
     display: flex;
     align-items: center;
+    width: 100%;
+    height: 60px;
+    max-width: 480px;
+    border-radius: 6px;
 }
 
 .forgot-password {
@@ -214,7 +218,6 @@
     width: 366px;
     height: 90px;
     background-size: cover;
-
 }
 
 /* Login buttons */
@@ -231,18 +234,12 @@
     border-radius: 6px;
 }
 
-.input .login-button {
-    width: 100%;
-    height: 60px;
-    max-width: 480px;
-}
-
 .create-account {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 60px; /* 동일한 높이로 수정 */
+    height: 60px;
     color: #fff;
     font-size: 18px;
     font-weight: 600;
