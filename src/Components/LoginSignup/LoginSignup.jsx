@@ -23,6 +23,9 @@ import {useMutation, useLazyQuery} from '@apollo/client';
 import {INSERT_USER_INFO, GET_ONE_USER} from '../../Query/query';
 
 import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
+// 비밀번호 해싱을 위한 라이브러리
+import crypto from 'crypto-js';
+
 
 const kakaoOAuthHandler = () => {
   const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
@@ -160,7 +163,7 @@ function LoginSignUp() {
       const userInfo = {
         email: userData.email,
         provider: "Google",
-        password: userData.password,
+        password: crypto.SHA512(userData.password).toString(),
         birthday: userData.birthday,
         clientId: userData.clientId,
         name: userData.name
@@ -180,7 +183,7 @@ function LoginSignUp() {
         "user": {
             "_and": [
               {"email": {"_eq": email}},
-              {"password": {"_eq": password}}
+              {"password": {"_eq": crypto.SHA512(password).toString()}}
             ]
           }
       }
