@@ -19,7 +19,13 @@ import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
 
+import {useMutation, useLazyQuery} from '@apollo/client';
+import {INSERT_USER_INFO, GET_ONE_USER} from '../../Query/query';
+
 import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
+// 비밀번호 해싱을 위한 라이브러리
+import crypto from 'crypto-js';
+
 
 const kakaoOAuthHandler = () => {
   const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
@@ -56,8 +62,13 @@ function LoginSignUp() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState(kakaoName || "");
   const [birthday, setBirthday] = useState("");
+  const [provider, setProvider] = useState("");
+  const [clientId, setClientId] = useState('');
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(!!kakaoEmail);
+  // query function
+  const [insertUserData] = useMutation(INSERT_USER_INFO);
+  const [getUserData] = useLazyQuery(GET_ONE_USER);
 
   // Google 로그인 후 사용자 정보 설정 (Sign Up 탭의 이메일과 이름만 설정)
   useEffect(() => {
@@ -113,18 +124,32 @@ function LoginSignUp() {
 
   const { text, subText, imgSrc } = leftContents[leftContentIndex];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (action === "Sign Up") {
-      const userData = { name, email, password, birthday };
-      localStorage.setItem('userData', JSON.stringify(userData));
+      const userData = { name, email, password, birthday, clientId };
+      // localStorage.setItem('userData', JSON.stringify(userData));
       alert(`Sign Up Data:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\nBirthday: ${birthday}`);
+      
+      console.log(userData);
+      const userInfo = {
+        email: userData.email,
+        provider: "Google",
+        password: crypto.SHA512(userData.password).toString(),
+        birthday: userData.birthday,
+        clientId: userData.clientId,
+        name: userData.name
+      }
+
+      insertUserData({variables: {
+        user: userInfo
+      }});
+      
       setIsGoogleLoggedIn(false);
       setIsKakaoLoggedIn(false);
       setAction("Login");
       setPassword("");
-    } else {
+    } else { // 그냥 Login Submit
       const savedUserData = JSON.parse(localStorage.getItem('userData'));
       if (savedUserData && savedUserData.email === loginEmail && savedUserData.password === password) {
         alert(`Login Data:\nEmail: ${loginEmail}\nPassword: ${password}`);
@@ -219,7 +244,7 @@ function LoginSignUp() {
                 <div className="input">
                   <img src={email_icon} alt="Email Icon" />
                   <input
-                    type="email"
+                    type="text"
                     placeholder="Email ID"
                     value={loginEmail}  // Login 탭의 이메일 상태 출력
                     onChange={(e) => setLoginEmail(e.target.value)}
@@ -231,7 +256,7 @@ function LoginSignUp() {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {setPassword(e.target.value);}}
                   />
                 </div>
                 <div className="input login-button">

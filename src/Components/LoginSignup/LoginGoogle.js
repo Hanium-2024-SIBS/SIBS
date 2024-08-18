@@ -11,7 +11,7 @@ export const fetchGoogleUserData = async () => {
   if (hash) {
     const accessToken = new URLSearchParams(hash.substring(1)).get('access_token');
     try {
-      const response = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' + accessToken, {
+      const response = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`, {
         headers: {
           authorization: `Bearer ${accessToken}`,
           accept: 'application/json',
