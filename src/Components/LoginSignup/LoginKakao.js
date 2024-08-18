@@ -17,45 +17,36 @@ const LoginKakao = () => {
       }
 
       try {
-        console.log('Authorization Code:', code);
-
         const { data: tokenData } = await axios.post(KAKAO_TOKEN_URL, null, {
           params: {
             grant_type: 'authorization_code',
-            client_id: process.env.REACT_APP_REST_API_KEY,
             redirect_uri: process.env.REACT_APP_REDIRECT_URI,
+            client_id: process.env.REACT_APP_REST_API_KEY,
             code,
             client_secret: process.env.REACT_APP_CLIENT_SECRET,
           },
         });
 
         const accessToken = tokenData.access_token;
-
         console.log('Access Token:', accessToken);
 
         const { data: userData } = await axios.get(KAKAO_USER_INFO_URL, {
           headers: {
-            Authorization: `Bearer ${accessToken}`, // 수정된 부분
+            Authorization: `Bearer ${accessToken}`,
           },
         });
 
-        // API 응답 데이터를 로그로 출력하여 구조 확인
         console.log('Kakao API response:', userData);
 
-        // Optional Chaining을 사용하여 안전하게 데이터에 접근
+        // API 응답 구조에 따라 userInfo 설정
         const userInfo = {
-          name: userData?.kakao_account?.name || 'Unknown',
-          email: userData?.kakao_account?.email || userData?.kakao_account?.account_email || 'Unknown',
+          name: userData.kakao_account?.name || 'Unknown',
+          email: userData.kakao_account?.email || 'Unknown',
         };
 
-        console.log('Kakao user data:', userInfo);
+        console.log('Parsed Kakao user data:', userInfo);
 
-        const savedUserData = JSON.parse(localStorage.getItem('userData'));
-        if (savedUserData && savedUserData.email === userInfo.email) {
-          navigate('/', { state: userInfo });
-        } else {
-          navigate('/login', { state: userInfo });
-        }
+        navigate('/login', { state: userInfo });
 
         return userInfo;
       } catch (error) {

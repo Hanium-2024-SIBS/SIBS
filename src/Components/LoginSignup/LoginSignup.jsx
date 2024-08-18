@@ -1,3 +1,4 @@
+// LoginSignUp.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './LoginSignup.css';
@@ -30,11 +31,16 @@ const kakaoOAuthHandler = () => {
 
 const naverOAuthHandler = () => {
   const CLIENT_ID = process.env.REACT_APP_NAVER_CLIENT_ID;
-  const REDIRECT_URI = process.env.REACT_APP_NAVER_REDIRECT_URI;
+  const REDIRECT_URI = encodeURIComponent(process.env.REACT_APP_NAVER_REDIRECT_URI);
   const STATE = Math.random().toString(36).substring(2);
+
+  // state 값을 로컬 스토리지에 저장하여 나중에 비교할 수 있도록 합니다.
+  localStorage.setItem('oauth_state', STATE);
+
+  // 네이버 인증 요청 URL 생성
   const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
 
-  window.location.href = NAVER_AUTH_URL;
+  window.location.href = NAVER_AUTH_URL;  // 네이버로 리다이렉트
 };
 
 function LoginSignUp() {

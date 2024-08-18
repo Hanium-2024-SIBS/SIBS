@@ -3,94 +3,125 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const LoginNaver = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchNaverUserData = async () => {
-      const NAVER_TOKEN_URL = 'https://nid.naver.com/oauth2.0/token';
-      const NAVER_USER_INFO_URL = 'https://openapi.naver.com/v1/nid/me';
 
-      const code = new URL(window.location.href).searchParams.get("code");
-      const state = new URL(window.location.href).searchParams.get("state");
 
-      if (!code || !state) {
-        console.error('Authorization code or state not found in URL');
-        return null;
-      }
 
-      try {
-        console.log('Authorization Code:', code);
-        console.log('State:', state);
 
-        const savedState = sessionStorage.getItem('naver_oauth_state');
-        if (state !== savedState) {
-          console.error('OAuth state mismatch. Potential CSRF attack.');
-          return;
-        }
+    useEffect(() => {
+        const fetchNaverUserData = async () => {
+            try {
+                const CLIENT_ID = process.env.REACT_APP_NAVER_CLIENT_ID;
+                const REDIRECT_URI = process.env.REACT_APP_NAVER_REDIRECT_URI;
+                const state = process.env.REACT_APP_NAVER_CLIENT_SECRET;
+                
+                // state 값을 로컬 스토리지에 저장
 
-        const { data: tokenData } = await axios.post(NAVER_TOKEN_URL, null, {
-          params: {
-            grant_type: 'authorization_code',  // 발급을 위한 grant_type 설정
-            client_id: process.env.REACT_APP_NAVER_CLIENT_ID,
-            client_secret: process.env.REACT_APP_NAVER_CLIENT_SECRET,
-            code,  // 인증 요청 API 호출에 성공하고 리턴받은 인증 코드
-            state, // CSRF 방지를 위해 저장된 state 값
-            redirect_uri: process.env.REACT_APP_NAVER_REDIRECT_URI, // 필요한 경우 URI를 포함
-          },
-        });
+            
+                const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&state=${state}`;
+            
+                window.location.href = NAVER_AUTH_URL;
+                
+                const NAVER_TOKEN_URL = 'https://nid.naver.com/oauth2.0/token';
+                const NAVER_USER_INFO_URL = 'https://openapi.naver.com/v1/nid/me';
+                
+                const code = new URL(window.location.href).searchParams.get('code');
+                const receivedState = new URL(window.location.href).searchParams.get('state');
 
-        const accessToken = tokenData.access_token;
+                // 로컬 스토리지에 저장된 state 가져오기
+                const originalState = localStorage.getItem('oauth_state');
+                console.log("Original state:", originalState);
+                console.log("Received state:", receivedState);
 
-        console.log('Access Token:', accessToken);
+                if (receivedState !== originalState) {
+                    console.error('Invalid state parameter');
+                    return;
+                }
 
-        const { data: userData } = await axios.get(NAVER_USER_INFO_URL, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+                if (!code || !receivedState) {
+                    console.error('Authorization code or state not found in URL');
+                    return;
+                }
+                console.log("Authorization code:", code);
 
-        // API 응답 데이터를 로그로 출력하여 구조 확인
-        console.log('Naver API response:', userData);
+                console.log('Sending token request to Naver...');
+                
+                const tokenResponse = await axios.post(NAVER_TOKEN_URL, null, {
+                    params: {
+                        grant_type: 'authorization_code',
+                        client_id: process.env.REACT_APP_NAVER_CLIENT_ID,
+                        client_secret: process.env.REACT_APP_NAVER_CLIENT_SECRET,
+                        code: code,
+                        state: receivedState, // state 추가
+                        redirect_uri: process.env.REACT_APP_NAVER_REDIRECT_URI,
+                    },
+                });
 
-        // Naver API로부터 받은 사용자 정보
-        const userInfo = {
-          name: userData.response.name,
-          email: userData.response.email,
+                console.log('Token response:', tokenResponse);
+
+                if (tokenResponse.status !== 200) {
+                    console.error('Failed to fetch access token:', tokenResponse.status, tokenResponse.statusText);
+                    return;
+                }
+
+                const accessToken = tokenResponse.data.access_token;
+                if (!accessToken) {
+                    console.error('Access token not found in response:', tokenResponse.data);
+                    return;
+                }
+
+                console.log('Access Token:', accessToken);
+
+                // 사용자 정보 요청
+                const userDataResponse = await axios.get(NAVER_USER_INFO_URL, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                console.log('Naver API response:', userDataResponse);
+
+                if (userDataResponse.status !== 200) {
+                    console.error('Failed to fetch user data:', userDataResponse.status, userDataResponse.statusText);
+                    return;
+                }
+
+                const userInfo = userDataResponse.data.response;
+                if (!userInfo || !userInfo.name || !userInfo.email) {
+                    console.error('User data is incomplete:', userInfo);
+                    return;
+                }
+
+                console.log('Naver user data:', userInfo);
+
+                // 로그인 후 SignUp 탭으로 이동하면서 사용자 정보를 전달
+                navigate('/login', { state: { name: userInfo.name, email: userInfo.email } });
+
+            } catch (error) {
+                console.error('An error occurred while fetching the token or user data.');
+
+                if (error.response) {
+                    console.error('Error response data:', error.response.data);
+                    console.error('Error response status:', error.response.status);
+                    console.error('Error response headers:', error.response.headers);
+                } else if (error.request) {
+                    console.error('Error request:', error.request);
+                } else {
+                    console.error('General error message:', error.message);
+                }
+            }
         };
 
-        console.log('Naver user data:', userInfo);
+        fetchNaverUserData();
+    }, [navigate]);
 
-        const savedUserData = JSON.parse(localStorage.getItem('userData'));
-        if (savedUserData && savedUserData.email === userInfo.email) {
-          navigate('/', { state: userInfo });
-        } else {
-          navigate('/signup', { state: userInfo });
-        }
-
-        return userInfo;
-      } catch (error) {
-        if (error.response) {
-          console.error('Error response:', error.response.data);
-          console.error('Error status:', error.response.status);
-          console.error('Error headers:', error.response.headers);
-        } else if (error.request) {
-          console.error('Error request:', error.request);
-        } else {
-          console.error('General Error:', error.message);
-        }
-        return null;
-      }
-    };
-
-    fetchNaverUserData();
-  }, [navigate]);
-
-  return (
-    <div>
-      <h1>Naver Login Callback</h1>
-      <p>Loading user information...</p>
-    </div>
-  );
+    return (
+        <div>
+            <h1>Naver Login Callback</h1>
+            <p>Loading user information...</p>
+        </div>
+    );
 };
 
 export default LoginNaver;
