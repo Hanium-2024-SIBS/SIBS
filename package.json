@@ -10,6 +10,8 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "apollo-link-ws": "^1.0.20",
+    "apollo-react-hooks": "^0.0.1",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
