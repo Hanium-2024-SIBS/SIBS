@@ -72,7 +72,7 @@ function ChatRoom() {
         };
       }
 
-      console.log("Emitting message:", newMessage); // 추가된 디버깅 로그
+      console.log("Emitting message:", newMessage);
 
       // 메시지를 UI에 바로 반영
       setMessages((messages) => [newMessage, ...messages]);
@@ -84,7 +84,7 @@ function ChatRoom() {
 
 
   return (
-    <div className="App">
+    <div className="chat-room">
       <header>
         <h1>채팅방</h1>
         <span className="material-icons settings-icon">
