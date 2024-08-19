@@ -25,7 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginSignUp />} />
           <Route path="/auth/kakao/callback" element={<LoginKakao />} />
-          <Route path="/naver" element={<LoginNaver />} />
+          <Route path="/auth/naver/callback" element={<LoginNaver />} />
           <Route path="chatroom" element={<ChatRoom />}/>
         </Routes>
       </Router>

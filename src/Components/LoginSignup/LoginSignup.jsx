@@ -1,7 +1,10 @@
-// LoginSignUp.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './LoginSignup.css';
+import crypto from 'crypto-js';
+import { useMutation, useLazyQuery } from '@apollo/client';
+import { INSERT_USER_INFO, GET_ONE_USER } from '../../Query/query';
+import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
 
 import user_icon from '../Assets/person.png';
 import email_icon from '../Assets/email.png';
@@ -11,21 +14,12 @@ import logo_img from '../Assets/logo.png';
 import chatting_img from '../Assets/chatting.png';
 import minigame1_img from '../Assets/vote.png';
 import minigame2_img from '../Assets/roulette.png';
-
 import signup_google from '../Assets/signup_google.png';
 import login_google from '../Assets/login_google.png';
 import signup_naver from '../Assets/signup_naver.png';
 import login_naver from '../Assets/login_naver.png';
 import signup_kakao from '../Assets/signup_kakao.png';
 import login_kakao from '../Assets/login_kakao.png';
-
-import {useMutation, useLazyQuery} from '@apollo/client';
-import {INSERT_USER_INFO, GET_ONE_USER} from '../../Query/query';
-
-import { googleOAuthHandler, fetchGoogleUserData } from './LoginGoogle';
-// 비밀번호 해싱을 위한 라이브러리
-import crypto from 'crypto-js';
-
 
 const kakaoOAuthHandler = () => {
   const REST_API_KEY = process.env.REACT_APP_REST_API_KEY;
@@ -37,40 +31,37 @@ const kakaoOAuthHandler = () => {
 
 const naverOAuthHandler = () => {
   const CLIENT_ID = process.env.REACT_APP_NAVER_CLIENT_ID;
-  const REDIRECT_URI = encodeURIComponent(process.env.REACT_APP_NAVER_REDIRECT_URI);
-  const STATE = Math.random().toString(36).substring(2);
+  const CLIENT_SECRET = process.env.REACT_APP_NAVER_CLIENT_SECRET;
+  const REDIRECT_URI = process.env.REACT_APP_NAVER_REDIRECT_URI;
 
-  // state 값을 로컬 스토리지에 저장하여 나중에 비교할 수 있도록 합니다.
+  const STATE = localStorage.getItem('oauth_state');
   localStorage.setItem('oauth_state', STATE);
 
-  // 네이버 인증 요청 URL 생성
   const NAVER_AUTH_URL = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
 
-  window.location.href = NAVER_AUTH_URL;  // 네이버로 리다이렉트
+  window.location.href = NAVER_AUTH_URL;
+  console.log("STATE :",STATE);
 };
 
 function LoginSignUp() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { name: kakaoName, email: kakaoEmail } = location.state || { name: "", email: "" };
+  const { name: kakaoName, email: kakaoEmail, action: initialAction } = location.state || { name: "", email: "", action: "Login" };
 
-  const [action, setAction] = useState("Login");
+  const [action, setAction] = useState(initialAction);
   const [leftContentIndex, setLeftContentIndex] = useState(0);
   const [fadeClass, setFadeClass] = useState("show");
-  const [email, setEmail] = useState(kakaoEmail || ""); // Sign Up 탭의 이메일 상태
-  const [loginEmail, setLoginEmail] = useState(""); // Login 탭의 이메일 상태
+  const [email, setEmail] = useState(kakaoEmail || "");
+  const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState(kakaoName || "");
   const [birthday, setBirthday] = useState("");
-  const [provider, setProvider] = useState("");
-  const [clientId, setClientId] = useState('');
   const [isGoogleLoggedIn, setIsGoogleLoggedIn] = useState(false);
   const [isKakaoLoggedIn, setIsKakaoLoggedIn] = useState(!!kakaoEmail);
-  // query function
+
   const [insertUserData] = useMutation(INSERT_USER_INFO);
   const [getUserData] = useLazyQuery(GET_ONE_USER);
 
-  // Google 로그인 후 사용자 정보 설정 (Sign Up 탭의 이메일과 이름만 설정)
   useEffect(() => {
     const fetchData = async () => {
       const googleUserInfo = await fetchGoogleUserData();
@@ -85,7 +76,6 @@ function LoginSignUp() {
     fetchData();
   }, [navigate]);
 
-  // 상태 초기화 및 동기화 (Login 탭의 이메일은 초기화하지 않음)
   useEffect(() => {
     if (action === "Sign Up") {
       if (isKakaoLoggedIn) {
@@ -93,12 +83,10 @@ function LoginSignUp() {
         setName((prev) => prev || kakaoName);
       }
     } else if (action === "Login") {
-      // 로그인 시 비밀번호만 초기화
       setPassword("");
     }
   }, [action, isGoogleLoggedIn, isKakaoLoggedIn, kakaoEmail, kakaoName]);
 
-  // 이메일과 이름이 제대로 설정되었는지 확인하는 로깅 (Sign Up 탭의 상태)
   useEffect(() => {
     console.log('Final Email state:', email);
     console.log('Final Name state:', name);
@@ -127,29 +115,25 @@ function LoginSignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (action === "Sign Up") {
-      const userData = { name, email, password, birthday, clientId };
-      // localStorage.setItem('userData', JSON.stringify(userData));
+      const userData = { name, email, password, birthday };
       alert(`Sign Up Data:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\nBirthday: ${birthday}`);
-      
       console.log(userData);
+
       const userInfo = {
         email: userData.email,
         provider: "Google",
         password: crypto.SHA512(userData.password).toString(),
         birthday: userData.birthday,
-        clientId: userData.clientId,
         name: userData.name
-      }
+      };
 
-      insertUserData({variables: {
-        user: userInfo
-      }});
+      insertUserData({ variables: { user: userInfo } });
       
       setIsGoogleLoggedIn(false);
       setIsKakaoLoggedIn(false);
       setAction("Login");
       setPassword("");
-    } else { // 그냥 Login Submit
+    } else {
       const savedUserData = JSON.parse(localStorage.getItem('userData'));
       if (savedUserData && savedUserData.email === loginEmail && savedUserData.password === password) {
         alert(`Login Data:\nEmail: ${loginEmail}\nPassword: ${password}`);
@@ -191,7 +175,7 @@ function LoginSignUp() {
                       <input
                         type="text"
                         placeholder="Name"
-                        value={name}  // 이름 상태 출력
+                        value={name}
                         readOnly
                       />
                     </div>
@@ -200,8 +184,8 @@ function LoginSignUp() {
                       <input
                         type="email"
                         placeholder="Email ID"
-                        value={email}  // 이메일 상태 출력
-                        readOnly  // Sign Up에서는 이메일은 변경 불가이므로 readOnly 설정
+                        value={email}
+                        readOnly
                       />
                     </div>
 
@@ -246,7 +230,7 @@ function LoginSignUp() {
                   <input
                     type="text"
                     placeholder="Email ID"
-                    value={loginEmail}  // Login 탭의 이메일 상태 출력
+                    value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
                   />
                 </div>
@@ -256,7 +240,7 @@ function LoginSignUp() {
                     type="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => {setPassword(e.target.value);}}
+                    onChange={(e) => { setPassword(e.target.value); }}
                   />
                 </div>
                 <div className="input login-button">

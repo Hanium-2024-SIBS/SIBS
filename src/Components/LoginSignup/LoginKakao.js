@@ -38,7 +38,6 @@ const LoginKakao = () => {
 
         console.log('Kakao API response:', userData);
 
-        // API 응답 구조에 따라 userInfo 설정
         const userInfo = {
           name: userData.kakao_account?.name || 'Unknown',
           email: userData.kakao_account?.email || 'Unknown',
@@ -46,7 +45,8 @@ const LoginKakao = () => {
 
         console.log('Parsed Kakao user data:', userInfo);
 
-        navigate('/login', { state: userInfo });
+        // Sign Up 탭을 표시하기 위해 LoginSignup으로 userInfo 전달
+        navigate('/login', { state: { ...userInfo, action: "Sign Up" } });
 
         return userInfo;
       } catch (error) {
