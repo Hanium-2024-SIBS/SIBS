@@ -3,22 +3,22 @@ body {
     background-color: #f5f5f5;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
+    position: relative;
 }
   
 .chat-room {
     display: flex;
     flex-direction: column;
     width: 600px;
-    height: 800px;
+    height: 100vh; /* 높이를 화면 전체에 맞춤 */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
-    border-radius: 20px;
+    border-radius: 20px 0 0 20px; /* 왼쪽 모서리만 둥글게 */
     overflow: hidden;
-    position: relative;
+    position: fixed; /* 화면에 고정 */
+    top: 0; /* 상단에서 0px 떨어짐 */
+    right: 0; /* 오른쪽에서 0px 떨어짐 */
 }
   
 header {
@@ -29,6 +29,7 @@ header {
     padding: 10px;
     background: linear-gradient(to right, #1488CC, #2B32B2);
     color: white;
+    border-top-left-radius: 20px; /* 헤더에 둥근 모서리 유지 */
 }
   
 .chat-container {
@@ -110,6 +111,7 @@ form {
     bottom: 0;
     width: 100%;
     box-sizing: border-box;
+    border-bottom-left-radius: 20px; /* 폼에 둥근 모서리 유지 */
 }
   
 form input {

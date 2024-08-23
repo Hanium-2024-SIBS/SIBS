@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import './ChatRoom.css'
 
 const SERVER_URL = 'http://localhost:5000'; // 파이썬 서버 URL
 
