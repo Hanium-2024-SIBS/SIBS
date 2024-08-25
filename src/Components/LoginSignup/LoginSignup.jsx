@@ -70,11 +70,19 @@ function LoginSignUp({ onLoginSuccess }) {
         setAction("Sign Up");
 
         // 소셜 로그인 성공 후 이메일 확인 및 자동 이동
+        const param = {
+          "user": {
+            "_and": [
+              {"email": {"_eq": googleUserInfo.email}}
+            ]
+          } 
+        };
+        const userData = await getUserData({variables: param});
         const storedEmail = localStorage.getItem('userEmail');
-        if (storedEmail && storedEmail === googleUserInfo.email) {
+        if (userData.data.User.length > 0 || (storedEmail && storedEmail === googleUserInfo.email)) {
+          navigate("/", { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
           alert(`로그인 성공!\n이메일: ${googleUserInfo.email}\n이름: ${googleUserInfo.name}`);
           localStorage.setItem("isLoggedIn", "true");
-          navigate("/", { state: { email: googleUserInfo.email, name: googleUserInfo.name } });
         }
       }
     };
@@ -122,7 +130,6 @@ function LoginSignUp({ onLoginSuccess }) {
     e.preventDefault();
     if (action === "Sign Up") {
       const userData = { name, email, password: crypto.SHA512(password).toString(), birthday };
-
       try {
         await insertUserData({ variables: { user: userData } });
         localStorage.setItem("userData", JSON.stringify(userData));
@@ -135,24 +142,36 @@ function LoginSignUp({ onLoginSuccess }) {
         console.error("Error inserting user data:", error);
         alert("회원가입에 실패했습니다. 다시 시도해주세요.");
       }
-    } else {
+    } else { // 로그인 시
       const savedUserData = JSON.parse(localStorage.getItem("userData"));
+      const param = {
+        "user": {
+          "_and": [
+            {"email": {"_eq": loginEmail}},
+            {"password": {"_eq": crypto.SHA512(password).toString()}}
+          ]
+        } 
+      }
+      const userData = await getUserData({variables: param});
+      const userName = userData.data.User[0].name;
+      console.log(userData.data);
       if (
+        userData.data.User.length > 0 || (
         savedUserData &&
         savedUserData.email === loginEmail &&
-        savedUserData.password === crypto.SHA512(password).toString()
+        savedUserData.password === crypto.SHA512(password).toString())
       ) {
-        alert(`로그인 성공!\n이메일: ${loginEmail}\n이름: ${savedUserData.name}`);
+        alert(`로그인 성공!\n이메일: ${loginEmail}\n이름: ${userName}`);
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userEmail", loginEmail);
-        localStorage.setItem("userName", savedUserData.name);
+        localStorage.setItem("userName", userName);
 
         // 로그인 성공 시 onLoginSuccess 호출
         if (onLoginSuccess) {
           onLoginSuccess();
         }
 
-        navigate("/", { state: { email: loginEmail, name: savedUserData.name } });
+        navigate("/", { state: { email: loginEmail, name: userName } });
       } else {
         alert("잘못된 이메일 또는 비밀번호입니다 다시 로그인해주세요.");
       }
