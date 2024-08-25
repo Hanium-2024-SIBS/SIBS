@@ -1,11 +1,11 @@
 import {useSubscription} from '@apollo/client';
-import {GET_CHAT_STREAM, GET_CHAT_STREAM_FILTERED, GET_ONE_USER, GET_CHAT_LOG} from './query';
+import {GET_CHAT_STREAM, GET_CHAT_STREAM_FILTERED, GET_ONE_USER, GET_CHAT_LOG} from '../Query/query';
 import {useEffect, useState} from "react";
 
 
 const chat = {
 	"Entrance": "2024-07-28T04:00",
-	"Room": 3
+	"Room": 5
 };
 
 function Data() {
