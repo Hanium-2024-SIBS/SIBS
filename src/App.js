@@ -5,7 +5,8 @@ import LoginSignUp from './Components/LoginSignup/LoginSignup';
 import LoginKakao from './Components/LoginSignup/LoginKakao';
 import LoginNaver from './Components/LoginSignup/LoginNaver';
 import ChatRoom from './Components/ChatRoom/ChatRoom';
-
+import OverlayPoll from './Components/Poll/OverlayPoll'
+import WheelSpinner from './Components/WheelSpinner/WheelSpinner'
 import {ApolloClient, ApolloProvider, InMemoryCache, HttpLink} from '@apollo/client';
 import { ModalProvider } from './ModalContext';
 
@@ -29,6 +30,9 @@ function App() {
             <Route path="/auth/kakao/callback" element={<LoginKakao />} />
             <Route path="/auth/naver/callback" element={<LoginNaver />} />
             <Route path="chatroom" element={<ChatRoom />}/>
+            <Route path="/wheelspinner" element={<WheelSpinner />}/>
+            <Route path="/overlaypoll" element={<OverlayPoll />}/>
+            
           </Routes>
         </Router>
       </ApolloProvider>

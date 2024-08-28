@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './Home.module.css';
 import logo from './Components/Assets/logo.png';
-import LoginSignup from './Components/LoginSignup/LoginSignup'; // LoginSignup 컴포넌트를 불러옴
-import { useModal } from './ModalContext';  // ModalContext 사용
+import LoginSignup from './Components/LoginSignup/LoginSignup';
+import { useModal } from './ModalContext';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonsIcon from '@mui/icons-material/Group';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import sportsImg from './Components/Assets/sports-bg.png';
+import jcImg from './Components/Assets/jc-bg.png';
+import gameImg from './Components/Assets/game-bg.png';
+import mukbangImg from './Components/Assets/mukbang-bg.png';
+import chatImg from './Components/Assets/chatting.png';
 
 function Home() {
   const navigate = useNavigate();
   const location = useLocation();
   const { email, name } = location.state || { email: "", name: "" };
-  const { isModalOpen, openModal, closeModal } = useModal();  // 모달 상태와 조작 함수 가져오기
-
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const storedLoggedInState = localStorage.getItem('isLoggedIn');
-    return storedLoggedInState === 'true';
-  });
-
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('userName') || "";
-  });
+  const { isModalOpen, openModal, closeModal } = useModal();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
+  const [userName, setUserName] = useState(() => localStorage.getItem('userName') || "");
+  const [activeTab, setActiveTab] = useState('Just Chatting'); // 기본적으로 Just Chatting 탭이 활성화됨
+  const aifilterRef = useRef(null); // Ref for the aifilter section
 
   useEffect(() => {
     if (email && name) {
@@ -37,9 +42,25 @@ function Home() {
     }
   }, [email, name]);
 
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const closeDropdown = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', closeDropdown);
+    return () => {
+      document.removeEventListener('mousedown', closeDropdown);
+    };
+  }, []);
+
   const handleAuthAction = () => {
     if (isLoggedIn) {
-      // Logout process
       localStorage.setItem('isLoggedIn', 'false');
       localStorage.removeItem('userEmail');
       localStorage.removeItem('userName');
@@ -47,18 +68,31 @@ function Home() {
       setUserName("");
       navigate('/');
     } else {
-      openModal();  // Login 버튼을 누르면 모달 열기
+      openModal();
     }
   };
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    // 여기서 모달을 닫지 않음
     setUserName(localStorage.getItem('userName'));
   };
 
   const navigateToHome = () => {
-    navigate('/');  // 홈 화면으로 이동
+    navigate('/');
+  };
+
+  const handleGetStartedClick = () => {
+    if (isLoggedIn) {
+      navigate('/chatroom');
+    } else {
+      openModal();
+    }
+  };
+
+  const handleScrollToAIFilter = () => {
+    if (aifilterRef.current) {
+      aifilterRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -77,19 +111,56 @@ function Home() {
             <div className="md:flex md:items-center md:gap-12">
               <nav aria-label="Global" className="hidden md:block">
                 <ul className="flex items-center gap-6 text-sm">
-                  <li><a className="text-gray-500 transition hover:text-gray-500/75" href="#"> Live </a></li>
+                  <li>
+                    <a className="text-black transition hover:text-gray-500/75" href="#getStarted"> 시작하기 </a>
+                  </li>
+                  <li className="relative" ref={dropdownRef}>
+                    <button
+                      className="text-black transition hover:text-gray-500/75"
+                      onClick={toggleDropdown}
+                    >
+                      기능
+                    </button>
+                    {isDropdownOpen && (
+                      <ul className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                        <li>
+                          <a
+                            href="#aifilter"
+                            onClick={handleScrollToAIFilter}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            AI 채팅 필터링
+                          </a>
+                        </li>
+                        <li>
+                        <a
+                            href="#vote"
+                            onClick={handleScrollToAIFilter}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            투표 기능
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#roulette"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            돌림판 기능
+                          </a>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
+
                   <li>
                     <button
-                      className="text-gray-500 transition hover:text-gray-500/75"
+                      className="text-black transition hover:text-gray-500/75"
                       onClick={() => navigate('/chatroom')}
                     >
-                      Chat
+                      SIBS 체험하기
                     </button>
                   </li>
-                  <li><a className="text-gray-500 transition hover:text-gray-500/75" href="#"> History </a></li>
-                  <li><a className="text-gray-500 transition hover:text-gray-500/75" href="#"> Services </a></li>
-                  <li><a className="text-gray-500 transition hover:text-gray-500/75" href="#"> Projects </a></li>
-                  <li><a className="text-gray-500 transition hover:text-gray-500/75" href="#"> Blog </a></li>
                 </ul>
               </nav>
 
@@ -109,10 +180,10 @@ function Home() {
                     </div>
                   ) : (
                     <button
-                      className="rounded-md bg-black px-5 py-2.5 text-sm font-medium text-white shadow"
+                      className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white shadow transition hover:text-black hover:bg-white focus:outline-none focus:ring focus:ring-black-400"
                       onClick={handleAuthAction}
                     >
-                      Login
+                      시작하기
                     </button>
                   )}
                 </div>
@@ -122,19 +193,273 @@ function Home() {
         </div>
       </header>
 
-      {/* Rest of your sections */}
-      {/* ... */}
+      <section id="getStarted" className="overflow-hidden bg-gray-50 sm:grid mt-50 sm:grid-cols-2 sm:items-center min-h-screen">
+        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
+            <h3 className="text-xl font-bold text-gray-900 md:text-3xl">
+              나만의 <span className="align-middle whitespace-nowrap rounded-full border border-black px-2.5 py-0.5 text-sm text-black"><span className='text-red-500'>●</span> Live</span> 방송 도우미 SIBS
+            </h3>
+
+            <p className="hidden text-gray-500 text-lg md:mt-4 md:block">
+              SIBS를 활용해 나만의 라이브 방송을 만들어가세요
+            </p>
+            <div className="mt-4 md:mt-8">
+              <button
+                onClick={handleGetStartedClick}
+                className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
+              >
+                지금 시작하기!
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`h-full w-full flex flex-col justify-start items-center pt-8 ${
+            ['Just Chatting', 'Game', 'Sports', 'Mukbang'].includes(activeTab)
+              ? 'max-h-screen bg-cover bg-center sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-ss-[30px] md:h-[calc(100%_-_4rem)] md:rounded-ss-[60px]'
+              : ''
+          }`}
+        >
+          <h2 className="text-2xl font-semibold text-gray-900 mt-20 fiexd">SIBS를 이용중인 스트리머</h2>
+          <div className="w-full mt-10">
+            <div className="sm:hidden">
+              <label htmlFor="Tab" className="sr-only">Tab</label>
+              <select id="Tab" className="w-full rounded-md border-gray-200" onChange={(e) => setActiveTab(e.target.value)} value={activeTab}>
+                <option value="Just Chatting">Just Chatting</option>
+                <option value="Game">Game</option>
+                <option value="Mukbang">Mukbang</option>
+                <option value="Sports">Sports</option>
+              </select>
+            </div>
+
+            <div className="hidden sm:block">
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex justify-center gap-6">
+                  <a
+                    href="#"
+                    onClick={() => setActiveTab('Just Chatting')}
+                    className={`shrink-0 ${activeTab === 'Just Chatting' ? 'rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600' : 'border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Just Chatting
+                  </a>
+
+                  <a
+                    href="#"
+                    onClick={() => setActiveTab('Game')}
+                    className={`shrink-0 ${activeTab === 'Game' ? 'rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600' : 'border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Game
+                  </a>
+
+                  <a
+                    href="#"
+                    onClick={() => setActiveTab('Mukbang')}
+                    className={`shrink-0 ${activeTab === 'Mukbang' ? 'rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600' : 'border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Mukbang
+                  </a>
+
+                  <a
+                    href="#"
+                    onClick={() => setActiveTab('Sports')}
+                    className={`shrink-0 ${activeTab === 'Sports' ? 'rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600' : 'border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Sports
+                  </a>
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs Content */}
+          {activeTab === 'Just Chatting' && (
+            <div className="jc-tab grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <StreamCard imgSrc={jcImg} title="토크 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={jcImg} title="토크 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={jcImg} title="토크 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={jcImg} title="토크 방송" streamer="감스트" viewers="2,500" />
+            </div>
+          )}
+
+          {activeTab === 'Game' && (
+            <div className="game-tab grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <StreamCard imgSrc={gameImg} title="게임 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={gameImg} title="게임 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={gameImg} title="게임 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={gameImg} title="게임 방송" streamer="감스트" viewers="2,500" />
+            </div>
+          )}
+
+          {activeTab === 'Mukbang' && (
+            <div className="mukbang-tab grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <StreamCard imgSrc={mukbangImg} title="먹방" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={mukbangImg} title="먹방" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={mukbangImg} title="먹방" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={mukbangImg} title="먹방" streamer="감스트" viewers="2,500" />
+            </div>
+          )}
+
+          {activeTab === 'Sports' && (
+            <div className="sports-tab grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <StreamCard imgSrc={sportsImg} title="스포츠 중계 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={sportsImg} title="스포츠 중계 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={sportsImg} title="스포츠 중계 방송" streamer="감스트" viewers="2,500" />
+              <StreamCard imgSrc={sportsImg} title="스포츠 중계 방송" streamer="감스트" viewers="2,500" />
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section id="aifilter" ref={aifilterRef} className="overflow-hidden bg-gray-50 sm:grid mt-50 sm:grid-cols-2 sm:items-center">
+        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
+            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+              AI를 활용한 실시간 채팅 필터링
+            </h2>
+
+            <p className="hidden text-gray-500 md:mt-4 md:block">
+              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
+              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
+              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
+            </p>
+
+            <div className="mt-4 md:mt-8">
+              <button
+                  onClick={handleGetStartedClick}
+                  className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
+                >
+                  지금 시작하기!
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <img
+          alt="chatting_ex"
+          src={chatImg}
+          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-ss-[30px] md:h-[calc(100%_-_4rem)] md:rounded-ss-[60px]"
+        />
+      </section>
       
+      <section id="vote" className="overflow-hidden bg-gray-50 sm:grid mb-50 sm:grid-cols-2 sm:items-center">
+        <img
+          alt="chatting_ex"
+          src={chatImg}
+          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-es-[30px] md:h-[calc(100%_-_4rem)] md:rounded-es-[60px]"
+        />
+
+        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-xl text-center ltr:sm:text-right rtl:sm:text-left">
+            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+              AI를 활용한 실시간 채팅 필터링
+            </h2>
+
+            <p className="hidden text-gray-500 md:mt-4 md:block">
+              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
+              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
+              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
+            </p>
+
+            <div className="mt-4 md:mt-8">
+              <button
+                onClick={handleGetStartedClick}
+                className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
+              >
+                지금 시작하기!
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="roulette" className="overflow-hidden bg-gray-50 sm:grid mb-50 sm:grid-cols-2 sm:items-center">
+        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
+            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
+              AI를 활용한 실시간 채팅 필터링
+            </h2>
+
+            <p className="hidden text-gray-500 md:mt-4 md:block">
+              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
+              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
+              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
+            </p>
+
+            <div className="mt-4 md:mt-8">
+              <button
+                onClick={handleGetStartedClick}
+                className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
+              >
+                지금 시작하기!
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <img
+          alt="chatting_ex"
+          src={chatImg}
+          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-ss-[30px] md:h-[calc(100%_-_4rem)] md:rounded-ss-[60px]"
+        />
+      </section>
+    
       {isModalOpen && (
         <>
           <div className={styles.overlay}></div> {/* 배경을 어둡게 하기 위한 오버레이 */}
           <div className={`${styles.loginSignupContainer} ${styles.showContainer}`}>
             <LoginSignup onLoginSuccess={handleLoginSuccess} />
-            <button onClick={closeModal} className={styles.closeButton}>Close</button>
+            <button onClick={closeModal} className={styles.closeButton}>
+              <CloseIcon />
+            </button>
           </div>
         </>
       )}
     </div>
+  );
+}
+
+function StreamCard({ imgSrc, title, streamer, viewers }) {
+  return (
+    <a href="#" className="block rounded-lg p-4 shadow-sm shadow-indigo-100 mt-4"> {/* mt-4 추가 */}
+      <img
+        alt=""
+        src={imgSrc}
+        className="h-56 w-full rounded-md object-cover"
+      />
+
+      <div className="mt-2">
+        <dl>
+          <div>
+            <dt className="sr-only">방 제목</dt>
+            <dd className="font-medium">{title}</dd>
+          </div>
+
+          <div>
+            <dt className="sr-only">스트리머 명</dt>
+            <dd className="text-sm text-gray-500">{streamer}</dd>
+          </div>
+        </dl>
+
+        <div className="mt-6 flex items-center gap-8 text-xs">
+          <div className="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
+            <PersonsIcon className="text-indigo-700" /> {/* PersonIcon */}
+            <div className="mt-1.5 sm:mt-0">
+              <p className="text-gray-500">시청자</p>
+              <p className="font-medium">{viewers}</p>
+            </div>
+          </div>
+
+          <div className="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
+            <RadioButtonCheckedIcon className="text-indigo-700" /> {/* RadioButtonCheckedIcon */}
+            <div className="mt-1.5 sm:mt-0">
+              <p className="text-gray-500">방송</p>
+              <p className="font-medium">LIVE</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
   );
 }
 

@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .root {
   position: relative;
 }
@@ -35,4 +39,23 @@
 }
 .hidden {
   display: none;
+}
+.closeButton {
+  position: absolute;
+  top: 25px; 
+  right: 40px; 
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: black; /* 아이콘 색상 */
+  font-size: 24px; /* 아이콘 크기 */
+}
+
+header {
+  height: 60px; /* 헤더의 높이를 설정합니다 */
+}
+
+section {
+  flex-grow: 1;
+  height: calc(100vh - 60px); /* 100vh에서 헤더의 높이를 뺀 값으로 설정 */
 }

@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import './ChatRoom.css'
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './ChatRoom.css';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 
-const SERVER_URL = 'http://localhost:5000'; // 파이썬 서버 URL
+const SERVER_URL = 'http://localhost:5000'; // Python server URL
 
 const userImages = [
   'https://i.pravatar.cc/150?img=2'
@@ -21,6 +25,8 @@ function ChatRoom() {
   const [userName] = useState(userNames[Math.floor(Math.random() * userNames.length)]);
   const [dislikedUsers, setDislikedUsers] = useState(new Set());
   const [likedUsers, setLikedUsers] = useState(new Set());
+  
+  const navigate = useNavigate(); // Use the useNavigate hook
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -31,7 +37,7 @@ function ChatRoom() {
   const sendMessage = async (e) => {
     e.preventDefault();
   
-    if (!formValue.trim()) return; // 빈 메시지 전송 방지
+    if (!formValue.trim()) return; // Prevent sending empty messages
   
     try {
       console.log("Sending message for profanity check:", formValue);
@@ -75,7 +81,7 @@ function ChatRoom() {
 
       console.log("Emitting message:", newMessage);
 
-      // 메시지를 UI에 바로 반영
+      // Add message to UI immediately
       setMessages((messages) => [newMessage, ...messages]);
       setFormValue('');
     } catch (err) {
@@ -83,14 +89,23 @@ function ChatRoom() {
     }
   };
 
+  const handleVoteClick = () => {
+    navigate('/overlaypoll'); // Navigate to OverlayPoll
+  };
+
+  const handleWheelSpinnerClick = () => {
+    navigate('/wheelspinner'); // Navigate to WheelSpinner
+  };
 
   return (
     <div className="chat-room">
-      <header>
+      <header className='chat-header'>
         <h1>채팅방</h1>
-        <span className="material-icons settings-icon">
-          settings
-        </span>
+        <div className="header-icons">
+          <SettingsIcon className="material-icons settings-icon" />
+          <HowToVoteIcon className="material-icons vote-icon" onClick={handleVoteClick} />
+          <DonutLargeIcon className="material-icons donut-icon" onClick={handleWheelSpinnerClick} />
+        </div>
       </header>
       <div className="chat-container" ref={chatContainerRef}>
         {messages.map((msg, index) => 
@@ -103,7 +118,7 @@ function ChatRoom() {
         )}
         <span ref={dummy}></span>
       </div>
-      <form onSubmit={sendMessage}>
+      <form className='chatroom-container' onSubmit={sendMessage}>
         <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="채팅을 입력해주세요" />
         <button type="submit">보내기</button>
       </form>

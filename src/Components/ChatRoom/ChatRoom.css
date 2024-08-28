@@ -21,7 +21,7 @@ body {
     right: 0; /* 오른쪽에서 0px 떨어짐 */
 }
   
-header {
+.chat-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -102,7 +102,7 @@ header {
     background-color: transparent;
 }
   
-form {
+.chatroom-container {
     display: flex;
     padding: 10px;
     background-color: #f5f5f5;
@@ -114,7 +114,7 @@ form {
     border-bottom-left-radius: 20px; /* 폼에 둥근 모서리 유지 */
 }
   
-form input {
+.chatroom-container input {
     flex: 1;
     padding: 10px;
     border: 1px solid #ccc;
@@ -123,7 +123,7 @@ form input {
     box-sizing: border-box;
 }
   
-form button {
+.chatroom-container button {
     padding: 10px 20px;
     border: none;
     background-color: #007bff;
@@ -133,7 +133,7 @@ form button {
     box-sizing: border-box;
 }
   
-form button:hover {
+.chatroom-container button:hover {
     background-color: #0056b3;
 }
   
