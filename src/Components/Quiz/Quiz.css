@@ -1,0 +1,114 @@
+.quiz-container {
+  background-color: #ffffff; /* 배경색을 흰색으로 변경 */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.quiz-container h1 {
+  color: #333;
+}
+
+.add-question-form {
+  margin-bottom: 20px;
+}
+
+.add-question-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: calc(50% - 22px);
+  margin-right: 10px;
+  box-sizing: border-box;
+}
+
+.add-question-form button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-question-form button:hover {
+  background-color: #0056b3;
+}
+
+.options-input {
+  margin-top: 10px;
+}
+
+.options-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.options-list li {
+  margin-bottom: 5px;
+}
+
+.question-list {
+  margin-bottom: 20px;
+}
+
+.question-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.question-list li {
+  margin-bottom: 10px;
+}
+
+.question-list button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.question-list button:hover {
+  background-color: #c82333;
+}
+
+.quiz-question {
+  margin-top: 20px;
+}
+
+.quiz-question form {
+  text-align: left;
+}
+
+.option {
+  margin-bottom: 10px;
+}
+
+.quiz-question form input[type="radio"] {
+  margin-right: 10px;
+}
+
+.quiz-question form button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quiz-question form button:hover {
+  background-color: #0056b3;
+}
+
+.result {
+  margin-top: 20px;
+  font-size: 18px;
+}
