@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 
 const OverlayPoll = ({ onClose }) => {
   const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState([""]); // 초기값으로 빈 옵션 추가
-  const [votes, setVotes] = useState([0]); // 각 옵션의 투표 수
+  const [options, setOptions] = useState([""]); 
+  const [votes, setVotes] = useState([0]); 
   const [voted, setVoted] = useState(false);
   const [pollActive, setPollActive] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
   const handleAddOption = () => {
     setOptions([...options, ""]);
-    setVotes([...votes, 0]); // 새로운 옵션에 대해 0표 초기화
+    setVotes([...votes, 0]); 
   };
 
   const handleOptionChange = (index, value) => {
@@ -26,7 +26,7 @@ const OverlayPoll = ({ onClose }) => {
       setOptions(newOptions);
       setVotes(newVotes);
       if (voted && newOptions.length === 1) {
-        setVoted(false); // 모든 옵션 삭제 후 남은 옵션이 없을 때 투표 상태 초기화
+        setVoted(false);
       }
     }
   };
@@ -55,6 +55,9 @@ const OverlayPoll = ({ onClose }) => {
   return (
     <div style={styles.overlayContainer}>
       <div style={styles.pollBox}>
+        <button onClick={onClose} style={styles.closeButton}>
+          &times;
+        </button>
         {!pollActive ? (
           <div>
             <h3 style={styles.title}>새 투표 시작</h3>
@@ -180,6 +183,7 @@ const styles = {
     width: "300px",
     textAlign: "center",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    position: 'relative',
   },
   title: {
     marginBottom: "10px",
@@ -259,6 +263,15 @@ const styles = {
   bar: {
     height: "100%",
     backgroundColor: "#007bff",
+  },
+  closeButton: {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    background: 'transparent',
+    border: 'none',
+    fontSize: '20px',
+    cursor: 'pointer',
   },
 };
 

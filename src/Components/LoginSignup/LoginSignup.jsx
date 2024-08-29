@@ -265,7 +265,7 @@ function LoginSignUp({ onLoginSuccess }) {
                       }}
                     ></div>
                     <div
-                      className="social-button signup-button"
+                      className="social-button signup-button naver-button" // 'naver-button' 클래스 추가
                       onClick={naverOAuthHandler}
                       style={{
                         backgroundImage: `url(${signup_naver})`,

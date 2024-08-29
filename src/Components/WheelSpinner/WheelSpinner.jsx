@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const WheelSpinner = () => {
+const WheelSpinner = ({ onClose }) => {
   const [items, setItems] = useState(['항목 1', '항목 2', '항목 3']);
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -26,7 +26,7 @@ const WheelSpinner = () => {
       setSpinning(true);
       setSelectedItem(null);
 
-      const randomRotation = Math.floor(Math.random() * 360) + 3600; // 3600도 이상 회전
+      const randomRotation = Math.floor(Math.random() * 360) + 3600;
       const newRotation = rotation + randomRotation;
       setRotation(newRotation);
 
@@ -96,14 +96,15 @@ const wheelStyle = (rotation, spinning) => ({
 const styles = {
   container: {
     display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: 'column',
+    alignItems: 'center',
+    position: 'relative',
     marginTop: '50px',
   },
   inputContainer: {
     display: 'flex',
     flexDirection: 'column',
-    marginRight: '20px',
+    marginBottom: '20px',
   },
   inputRow: {
     display: 'flex',

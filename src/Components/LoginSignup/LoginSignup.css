@@ -229,11 +229,18 @@ html, body {
     background-color: #fff;
 }
 
-/* Signup buttons */
+
+
 .social-button.signup-button {
     width: 366px;
     height: 90px;
     background-size: cover;
+}
+
+.social-button .naver-button{
+    width: 366px;
+    height: 90px;
+    background-color: #03C75A;
 }
 
 /* Login buttons */
@@ -242,12 +249,19 @@ html, body {
     height: 80px;
     border-radius: 50%;
 }
-
+.naver-button {
+    
+    width: 366px;        
+    height: 90px;      
+    background-color: #03C75A;
+  }
+  
 /* Rectangular buttons for Kakao in Login */
 .rect-button {
-    width: 90px;
-    height: 45px;
-    border-radius: 6px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50px;
+    background-color: #FEE500;
 }
 
 .create-account {
