@@ -12,6 +12,10 @@ import jcImg from './Components/Assets/jc-bg.png';
 import gameImg from './Components/Assets/game-bg.png';
 import mukbangImg from './Components/Assets/mukbang-bg.png';
 import chatImg from './Components/Assets/chatting.png';
+import voteImg from './Components/Assets/vote.png';
+import quizImg from './Components/Assets/quiz.png';
+import rouletteImg from './Components/Assets/roulette.png';
+import bannedwordImg from './Components/Assets/bannedword.png';
 
 function Home() {
   const navigate = useNavigate();
@@ -97,7 +101,7 @@ function Home() {
 
   return (
     <div className={styles.root}>
-      <header className="w-full bg-white fixed top-0 left-0 shadow">
+      <header className="w-full bg-white fixed top-0 left-0 shadow z-50">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex-1 flex items-center">
@@ -147,6 +151,14 @@ function Home() {
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
                             돌림판 기능
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            href="#quiz"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            퀴즈 기능
                           </a>
                         </li>
                       </ul>
@@ -261,7 +273,7 @@ function Home() {
                   </a>
 
                   <a
-                    href="#"
+                    href="#"  
                     onClick={() => setActiveTab('Sports')}
                     className={`shrink-0 ${activeTab === 'Sports' ? 'rounded-t-lg border border-gray-300 border-b-white p-3 text-sm font-medium text-sky-600' : 'border border-transparent p-3 text-sm font-medium text-gray-500 hover:text-gray-700'}`}
                   >
@@ -311,99 +323,49 @@ function Home() {
         </div>
       </section>
 
-      <section id="aifilter" ref={aifilterRef} className="overflow-hidden bg-gray-50 sm:grid mt-50 sm:grid-cols-2 sm:items-center">
-        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
-          <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
-            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-              AI를 활용한 실시간 채팅 필터링
-            </h2>
+      {/* Use the new FuncSection component to wrap the sections */}
+      <FuncSection
+        id="aifilter"
+        title="AI를 활용한 실시간 채팅 필터링"
+        description="학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
+        AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도
+        실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다."
+        imgSrc={chatImg}
+        buttonText="지금 시작하기!"
+        buttonAction={handleGetStartedClick}
+        reverse={false}
+      />
 
-            <p className="hidden text-gray-500 md:mt-4 md:block">
-              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
-              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
-              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
-            </p>
+      <FuncSection
+        id="vote"
+        title="실시간 소통을 위한 방송 기능-1 투표 기능"
+        description="스트리머가 직접 투표를 열어 시청자들과 소통할 수 있는 기능입니다. 투표 주제와 보기를 입력 후 투표를 시작하세요!"
+        imgSrc={voteImg}
+        buttonText="지금 시작하기!"
+        buttonAction={handleGetStartedClick}
+        reverse={true}
+      />
 
-            <div className="mt-4 md:mt-8">
-              <button
-                  onClick={handleGetStartedClick}
-                  className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
-                >
-                  지금 시작하기!
-              </button>
-            </div>
-          </div>
-        </div>
+      <FuncSection
+        id="roulette"
+        title="실시간 소통을 위한 방송 기능-2 룰렛 기능"
+        description="스트리머가 시청자에게 받은 의견을 룰렛에 넣어 뽑을 수 있는 기능입니다. 시청자와의 소통을 통해 항목을 추가해서 룰렛을 시작하세요!"
+        imgSrc={rouletteImg}
+        buttonText="지금 시작하기!"
+        buttonAction={handleGetStartedClick}
+        reverse={false}
+      />
 
-        <img
-          alt="chatting_ex"
-          src={chatImg}
-          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-ss-[30px] md:h-[calc(100%_-_4rem)] md:rounded-ss-[60px]"
-        />
-      </section>
-      
-      <section id="vote" className="overflow-hidden bg-gray-50 sm:grid mb-50 sm:grid-cols-2 sm:items-center">
-        <img
-          alt="chatting_ex"
-          src={chatImg}
-          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-es-[30px] md:h-[calc(100%_-_4rem)] md:rounded-es-[60px]"
-        />
+      <FuncSection
+        id="quiz"
+        title="실시간 소통을 위한 방송 기능-3 퀴즈 기능"
+        description="기본적으로 제공하는 퀴즈와 시청자가 직접 만든 퀴즈를 스트리머가 직접 풀어볼 수 있는 기능입니다. 스트리머에게 창의적인 문제를 내보세요!"
+        imgSrc={quizImg}
+        buttonText="지금 시작하기!"
+        buttonAction={handleGetStartedClick}
+        reverse={true}
+      />
 
-        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
-          <div className="mx-auto max-w-xl text-center ltr:sm:text-right rtl:sm:text-left">
-            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-              AI를 활용한 실시간 채팅 필터링
-            </h2>
-
-            <p className="hidden text-gray-500 md:mt-4 md:block">
-              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
-              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
-              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
-            </p>
-
-            <div className="mt-4 md:mt-8">
-              <button
-                onClick={handleGetStartedClick}
-                className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
-              >
-                지금 시작하기!
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="roulette" className="overflow-hidden bg-gray-50 sm:grid mb-50 sm:grid-cols-2 sm:items-center">
-        <div className="p-8 md:p-12 lg:px-16 lg:py-24">
-          <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
-            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-              AI를 활용한 실시간 채팅 필터링
-            </h2>
-
-            <p className="hidden text-gray-500 md:mt-4 md:block">
-              학습된 AI 모델을 활용하여 실시간으로 입력되는 채팅을 차단합니다. 뿐만 아니라
-              AI가 감지하지 못하는 비속어를 금지어로 설정해 금지어를 입력했을 경우에도<br/>
-              실시간으로 필터링 됩니다. 이를 통해 원활한 라이브 방송 환경을 조성합니다.
-            </p>
-
-            <div className="mt-4 md:mt-8">
-              <button
-                onClick={handleGetStartedClick}
-                className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
-              >
-                지금 시작하기!
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <img
-          alt="chatting_ex"
-          src={chatImg}
-          className="h-full w-full object-cover sm:h-[calc(100%_-_2rem)] sm:self-end sm:rounded-ss-[30px] md:h-[calc(100%_-_4rem)] md:rounded-ss-[60px]"
-        />
-      </section>
-    
       {isModalOpen && (
         <>
           <div className={styles.overlay}></div> {/* 배경을 어둡게 하기 위한 오버레이 */}
@@ -462,5 +424,36 @@ function StreamCard({ imgSrc, title, streamer, viewers }) {
     </a>
   );
 }
+
+// New FuncSection component
+function FuncSection({ id, title, description, imgSrc, buttonText, buttonAction, reverse }) {
+  return (
+    <section id={id} className="relative overflow-hidden bg-gray-50 sm:grid sm:grid-cols-2 sm:items-center z-20">
+      <div className={`sm:w-full ${reverse ? 'order-2' : ''}`}>
+        <div className="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
+          <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{title}</h2>
+          <p className="hidden text-gray-500 md:mt-4 md:block">{description}</p>
+          <div className="mt-4 md:mt-8">
+            <button
+              onClick={buttonAction}
+              className="inline-block rounded bg-black px-12 py-3 text-base md:text-lg font-medium text-white transition hover:bg-white hover:text-black focus:outline-none focus:ring focus:ring-black-400"
+            >
+              {buttonText}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`flex justify-center sm:w-full ${reverse ? 'order-1' : ''}`}>
+        <img
+          alt={id}
+          src={imgSrc}
+          className="transform scale-80 w-auto h-auto object-cover sm:self-end sm:rounded-ss-[30px] md:rounded-ss-[60px]" // scale-80 적용
+        />
+      </div>
+    </section>
+  );
+}
+
 
 export default Home;
