@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
+import axios from 'axios';
 import {v4 as uuidv4} from 'uuid';
 import {useMutation, useSubscription} from '@apollo/client';
 import {useNavigate} from 'react-router-dom';
@@ -6,7 +7,10 @@ import CircleMenu from './CircleMenu';
 import OverlayPoll from '../Poll/OverlayPoll';
 import WheelSpinner from '../WheelSpinner/WheelSpinner';
 import BannedWord from '../BannedWord/BannedWord';
-import QuizPlay from '../Quiz/QuizPlay'; // QuizPlay import
+import QuizPlay from '../Quiz/QuizPlay';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import logo from '../Assets/logo.png';
 import './ChatRoom.css';
 import {GET_CHAT_STREAM, GET_CHAT_STREAM_FILTERED, INSERT_CHAT} from '../../Query/query';
@@ -65,7 +69,7 @@ function ChatRoom() {
 
 			setFormValue('');
 		} catch (err) {
-			console.error('Error in sending message:', err.message);
+			console.error('Error in profanity check:', err.message);
 		}
 	};
 
@@ -74,14 +78,14 @@ function ChatRoom() {
 			setMessages((prevMessages) => [
 				...prevMessages,
 				...chatData.Chat_log_stream.map(chatLogStreamElement => ({
-					text: chatLogStreamElement.content,
-					createdAt: chatLogStreamElement.sent_at,
-					userName,
+					text: chatLogStreamElement['content'],
+					createdAt: chatLogStreamElement['sent_at'],
+					userName: userName,
 					likes: 0,
 					dislikes: 0,
-					messageId: chatLogStreamElement.message_id,
-					senderId: chatLogStreamElement.sender_id,
-					isFiltered: chatLogStreamElement.is_filtered
+					messageId: chatLogStreamElement['message_id'],
+					senderId: chatLogStreamElement['sender_id'],
+					isFiltered: chatLogStreamElement['is_filtered']
 				}))
 			]);
 		}
@@ -100,6 +104,14 @@ function ChatRoom() {
 			}
 		}
 	}, [filteredData]);
+
+	const handleVoteClick = () => {
+		navigate('/overlaypoll'); // Navigate to OverlayPoll
+	};
+
+	const handleWheelSpinnerClick = () => {
+		navigate('/wheelspinner'); // Navigate to WheelSpinner
+	};
 
 	const openOverlayPoll = () => setOverlayPollOpen(true);
 	const closeOverlayPoll = () => setOverlayPollOpen(false);
@@ -125,19 +137,10 @@ function ChatRoom() {
 							</a>
 							<h2 className = "text-2xl font-semibold ml-1">SIBS</h2>
 						</div>
-						<div className = "md:flex md:items-center md:gap-12">
-							<nav aria-label = "Global" className = "hidden md:block">
-								<ul className = "flex items-center gap-6 text-sm">
-									<li>
-										<a
-											className = "text-black transition hover:text-gray-500/75"
-											href = "http://localhost:3000"
-										>
-											돌아가기
-										</a>
-									</li>
-								</ul>
-							</nav>
+						<div className = "header-icons md:flex md:items-center md:gap-12">
+							<SettingsIcon className = "material-icons settings-icon"/>
+							<HowToVoteIcon className = "material-icons vote-icon" onClick = {handleVoteClick}/>
+							<DonutLargeIcon className = "material-icons donut-icon" onClick = {handleWheelSpinnerClick}/>
 						</div>
 					</div>
 				</div>
@@ -151,7 +154,7 @@ function ChatRoom() {
 					<CircleMenu
 						onOpenOverlayPoll = {openOverlayPoll}
 						onOpenWheelSpinner = {openWheelSpinner}
-						onOpenQuiz = {openQuiz}  // QuizPlay 모달 열기 함수 전달
+						onOpenQuiz = {openQuiz}
 						onOpenBannedWord = {openBannedWord}
 					/>
 
